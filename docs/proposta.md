@@ -55,24 +55,26 @@ Desenvolver uma aplicação Web para centralizar e gerenciar o fluxo de atendime
 - Banco de dados relacional MySQL
 
 ## 12. Diagrama Visão Geral da Solução
-+-------------------------------------------------------+
-|                   CLIENTE (FRONTEND)                  |
-|              React.js / HTML / CSS / JS               |
-|               (Funcionário / Técnico)                 |
-+-------------------------------------------------------+
-|
-Requisições HTTP
-v
-+-------------------------------------------------------+
-|                   SERVIDOR (BACKEND)                  |
-|                   Node.js / Express                   |
-|        - API REST / Autenticação / Regras             |
-+-------------------------------------------------------+
-|
-Consultas SQL
-v
-+-------------------------------------------------------+
-|                   BANCO DE DADOS                      |
-|                        MySQL                          |
-|       - Tabelas: Usuarios, Chamados, Categorias...    |
-+-------------------------------------------------------+
+
+```text
+  +-------------------------------------------------------+
+  |                   CLIENTE (FRONTEND)                  |
+  |              React.js / HTML / CSS / JS               |
+  |               (Funcionário / Técnico)                 |
+  +-------------------------------------------------------+
+                              |
+                       Requisições HTTP
+                              v
+  +-------------------------------------------------------+
+  |                   SERVIDOR (BACKEND)                  |
+  |                   Node.js / Express                   |
+  |        - API REST / Autenticação / Regras             |
+  +-------------------------------------------------------+
+                              |
+                        Consultas SQL
+                              v
+  +-------------------------------------------------------+
+  |                   BANCO DE DADOS                      |
+  |                        MySQL                          |
+  |       - Tabelas: Usuarios, Chamados, Categorias...    |
+  +-------------------------------------------------------+

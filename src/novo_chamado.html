@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Formulário para abertura e registro de novos chamados de suporte técnico no sistema TechDesk.">
+  <meta name="keywords" content="TechDesk, Novo Chamado, Abrir Incidente, Suporte Técnico, Formulário de Chamado, TI">
+  <meta name="author" content="Matheus S. Marques">
+  <title>TechDesk - Novo Chamado</title>
+</head>
+<body>
+  <header>
+    <h1>TechDesk</h1>
+    <nav>
+      <!-- Essa parte pode sofrer mudanças pois ainda é só para fins de navegação -->   
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="novo_chamado.html">Abrir Chamado</a></li>
+        <li><a href="index.html">Sair</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>Abrir Novo Chamado de Suporte</h2>
+      <form action="dashboard.html" method="GET"> <!-- action e method podem sofrer alterações futuramente, a implementação dessa forma é apenas para navegação entra as páginas  -->
+        <p>
+          <label for="titulo">Título da Solicitação:</label><br>
+          <input type="text" id="titulo" name="titulo" required placeholder="Ex: Monitor piscando">
+        </p>
+        <p>
+          <label for="categoria">Categoria:</label><br>
+          <select id="categoria" name="categoria" required>
+            <option value="">Selecione...</option>
+            <option value="hardware">Hardware</option>
+            <option value="software">Software</option>
+            <option value="rede">Rede / Internet</option>
+          </select>
+        </p>
+        <p>
+          <label for="prioridade">Prioridade:</label><br>
+          <select id="prioridade" name="prioridade" required>
+            <option value="baixa">Baixa</option>
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+          </select>
+        </p>
+        <p>
+          <label for="descricao">Descrição detalhada do problema:</label><br>
+          <textarea id="descricao" name="descricao" rows="5" cols="40" required placeholder="Descreva o problema e inclua o modelo do equipamento, se houver..."></textarea>
+        </p>
+        <button type="submit">Enviar Chamado</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 TechDesk - Novo Chamado</p>
+  </footer>
+</body>
+</html>

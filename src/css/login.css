@@ -1,0 +1,116 @@
+/* estrutura e centralização tela de login*/
+.login-body {
+  background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface-soft) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+/*tela de login*/
+.login-card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-surface-soft);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-header h1 {
+  color: var(--color-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.login-header p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/*formulário e ações*/
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.login-form label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-dark);
+}
+
+.login-footer-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.login-footer-links a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-footer-links a:hover {
+  text-decoration: underline;
+}
+
+.login-btn-container {
+  margin-top: 1rem;
+}
+
+.login-btn-container .btn {
+  width: 100%;
+}
+
+
+/* breakpoint 1: tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-header h1 {
+    font-size: 1.75rem;
+  }
+}
+
+/* breakpoint 2: smartphones (max-width: 480px) */
+@media (max-width: 480px) {
+  .login-body {
+    padding: 1rem;
+  }
+
+  .login-card {
+    padding: 1.5rem 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .login-footer-links {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+}

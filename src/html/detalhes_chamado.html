@@ -54,7 +54,7 @@
         </section>
 
         <!-- formulário para inserir nova resposta -->
-        <form action="detalhes_chamado.html" method="POST" class="form-grid" style="margin-top: 2rem;">
+        <form action="detalhes_chamado.html" method="POST" class="form-grid" style="margin-top: 2rem;" novalidate>
           <div class="form-group">
             <label for="comentario">Adicionar Atualização / Parecer Técnico:</label>
             <textarea id="comentario" name="comentario" placeholder="Escreva uma resposta ou atualização do status..." required></textarea>
@@ -107,5 +107,8 @@
   <footer class="main-footer">
     <p>&copy; 2026 TechDesk - Painel Administrativo</p>
   </footer>
+
+  <script src="../js/detalhes.js"></script>
+
 </body>
 </html>

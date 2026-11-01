@@ -1,0 +1,30 @@
+{
+  "chamados": [
+    {
+      "id": "101",
+      "titulo": "Impressora do setor de vendas não liga",
+      "categoria": "Hardware",
+      "prioridade": "Alta",
+      "status": "Aberto",
+      "descricao": "A impressora da recepção parou de responder após queda de energia."
+    },
+    {
+      "id": "102",
+      "titulo": "Sem acesso ao sistema ERP",
+      "categoria": "Software",
+      "prioridade": "Média",
+      "status": "Em Atendimento",
+      "descricao": "Erro de autenticação ao tentar abrir o módulo financeiro."
+    },
+    {
+      "titulo": "Teste de Chamado",
+      "categoria": "acesso",
+      "prioridade": "baixa",
+      "status": "Aberto",
+      "descricao": "Apenas um teste de abertura de novo chamado.",
+      "dataCriacao": "2026-11-01T13:54:49.944Z",
+      "id": "PMhGIUeqQ-k"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

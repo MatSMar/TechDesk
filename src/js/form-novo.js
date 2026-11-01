@@ -1,3 +1,5 @@
+import { criarChamado } from './services/api.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.querySelector('form');
   const inputTitulo = document.getElementById('titulo');
@@ -5,9 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectPrioridade = document.getElementById('prioridade');
   const textareaDescricao = document.getElementById('descricao');
 
-  // Função auxiliar para exibir mensagem de erro abaixo do campo
+  //funções exibir mensagem de erro abaixo do campo
   function mostrarErro(campo, mensagem) {
-    // Limpa erro anterior se existir
     removerErro(campo); 
     
     campo.classList.add('input-error');
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     campo.parentElement.appendChild(spanErro);
   }
 
-  // Função auxiliar para remover mensagem de erro do campo
+  //remover mensagem de erro do campo
   function removerErro(campo) {
     campo.classList.remove('input-error');
     const spanExistente = campo.parentElement.querySelector('.error-message');
@@ -31,15 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Evento de envio do formulário
-  form.addEventListener('submit', (event) => {
-    // Impede o envio padrão
+  //envio do formulário
+  form.addEventListener('submit', async (event) => {
     event.preventDefault(); 
 
     let formValido = true;
 
-    // 1. Validação do Título
-    const tituloVal = inputTitulo.value.trim();
+    //validação do título
+    const tituloVal = inputTitulo ? inputTitulo.value.trim() : '';
     if (tituloVal === '') {
       mostrarErro(inputTitulo, 'O título do chamado é obrigatório.');
       formValido = false;
@@ -50,16 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
       removerErro(inputTitulo);
     }
 
-    // 2. Validação da Categoria
-    if (selectCategoria.value === '') {
+    //validação da categoria
+    if (selectCategoria && selectCategoria.value === '') {
       mostrarErro(selectCategoria, 'Por favor, selecione uma categoria.');
       formValido = false;
     } else {
       removerErro(selectCategoria);
     }
 
-    // 3. Validação da Descrição
-    const descricaoVal = textareaDescricao.value.trim();
+    //validação da descrição
+    const descricaoVal = textareaDescricao ? textareaDescricao.value.trim() : '';
     if (descricaoVal === '') {
       mostrarErro(textareaDescricao, 'A descrição detalhada é obrigatória.');
       formValido = false;
@@ -70,27 +70,48 @@ document.addEventListener('DOMContentLoaded', () => {
       removerErro(textareaDescricao);
     }
 
-    // Se todos os campos forem válidos
-    if (formValido) {
-      // Criação de objeto com os dados (demonstração de estrutura de dados)
-      const novoChamado = {
-        titulo: tituloVal,
-        categoria: selectCategoria.value,
-        prioridade: selectPrioridade.value,
-        descricao: descricaoVal,
-        dataCriacao: new Date().toISOString()
-      };
+    //interrompe o envio se houver erros
+    if (!formValido) return;
 
-      console.log('Novo chamado criado:', novoChamado);
+    //montagem do objeto do chamado
+    const novoChamado = {
+      titulo: tituloVal,
+      categoria: selectCategoria ? selectCategoria.value : 'Geral',
+      prioridade: selectPrioridade ? selectPrioridade.value : 'Média',
+      status: 'Aberto',
+      descricao: descricaoVal,
+      dataCriacao: new Date().toISOString()
+    };
 
-      // Feedback dinâmico ao usuário
+    //feedback visual de carregamento
+    const botaoSubmit = form.querySelector('button[type="submit"]') || form.querySelector('.btn-submit');
+    const textoOriginal = botaoSubmit ? botaoSubmit.innerText : 'Salvar';
+    
+    if (botaoSubmit) {
+      botaoSubmit.disabled = true;
+      botaoSubmit.innerText = 'Salvando no servidor...';
+    }
+
+    //post para o servidor
+    const resultado = await criarChamado(novoChamado);
+
+    if (resultado.sucesso) {
       alert('Chamado cadastrado com sucesso!');
       window.location.href = 'dashboard.html';
+    } else {
+      alert(`Erro ao salvar no servidor: ${resultado.mensagem}`);
+      if (botaoSubmit) {
+        botaoSubmit.disabled = false;
+        botaoSubmit.innerText = textoOriginal;
+      }
     }
   });
 
-  // Limpa mensagens de erro conforme o usuário digita nos campos
-  [inputTitulo, selectCategoria, textareaDescricao].forEach((campo) => {
-    campo.addEventListener('input', () => removerErro(campo));
+  //limpa mensagens de erro conforme o usuário digita ou altera os campos
+  [inputTitulo, selectCategoria, selectPrioridade, textareaDescricao].forEach((campo) => {
+    if (campo) {
+      campo.addEventListener('input', () => removerErro(campo));
+      campo.addEventListener('change', () => removerErro(campo));
+    }
   });
 });

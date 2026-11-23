@@ -4,8 +4,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tbodyTabela = document.querySelector('tbody');
   const inputBusca = document.getElementById('busca');
   const selectVisao = document.getElementById('filtro-visao');
+  const valoresEstatisticas = document.querySelectorAll('.stats-grid .stat-value');
 
   let listaChamadosGlobal = [];
+
+  //muda as estatisticas dos baners
+  function atualizarEstatisticas(chamados) {
+    if (valoresEstatisticas.length < 4) return;
+
+    const total = chamados.length;
+    const abertos = chamados.filter((c) => String(c.status || '').toLowerCase().includes('aberto')).length;
+    const emAtendimento = chamados.filter((c) => {
+      const s = String(c.status || '').toLowerCase();
+      return s.includes('atendimento') || s.includes('andamento');
+    }).length;
+    const resolvidos = chamados.filter((c) => {
+      const s = String(c.status || '').toLowerCase();
+      return s.includes('resolvido') || s.includes('concluido');
+    }).length;
+
+    valoresEstatisticas[0].textContent = total;
+    valoresEstatisticas[1].textContent = abertos;
+    valoresEstatisticas[2].textContent = emAtendimento;
+    valoresEstatisticas[3].textContent = resolvidos;
+  }
 
   //carrega os chamados na tabela e trata busca vazia
   function renderizarTabela(chamados) {
@@ -44,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function formatarClasseStatus(status) {
     const s = status.toLowerCase();
     if (s.includes('aberto')) return 'aberto';
-    if (s.includes('andamento')) return 'andamento';
+    if (s.includes('atendimento')) return 'andamento';
     return 'concluido';
   }
 
@@ -84,6 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (resultado.sucesso) {
       //estado sucesso
       listaChamadosGlobal = resultado.dados;
+      atualizarEstatisticas(listaChamadosGlobal);
       renderizarTabela(listaChamadosGlobal);
     } else {
       //estado erro

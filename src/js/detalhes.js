@@ -1,4 +1,4 @@
-import { buscarChamadoPorId } from './services/api.js';
+import { buscarChamadoPorId, atualizarChamado } from './services/api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const formComentario = document.querySelector('form.details-form') || document.querySelector('form');
@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const selectStatus = document.getElementById('alterar-status');
   const badgeStatus = document.querySelector('.badge-status');
 
-  const tituloEl = document.querySelector('.detalhes-header h2') || document.querySelector('h1');
-  const descricaoEl = document.querySelector('.detalhes-descricao p');
-  const categoriaEl = document.querySelector('.detalhes-meta span:nth-child(1)');
-  const prioridadeEl = document.querySelector('.detalhes-meta span:nth-child(2)');
+  const tituloEl = document.querySelector('.form-header h2') || document.querySelector('.detalhes-header h2') || document.querySelector('h1');
+  const descricaoEl = document.getElementById('detalhe-descricao') || document.querySelector('.detalhes-descricao p');
+  const categoriaEl = document.getElementById('detalhe-categoria') || document.querySelector('.detalhes-meta span:nth-child(1)');
+  const prioridadeEl = document.getElementById('detalhe-prioridade') || document.querySelector('.detalhes-meta span:nth-child(2)');
 
   //pega o id da url e carrega os dados servidor
   const urlParams = new URLSearchParams(window.location.search);
@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (tituloEl) tituloEl.innerText = `#${chamado.id} — ${chamado.titulo}`;
       if (descricaoEl) descricaoEl.innerText = chamado.descricao;
-      if (categoriaEl && chamado.categoria) categoriaEl.innerText = `Categoria: ${chamado.categoria}`;
-      if (prioridadeEl && chamado.prioridade) prioridadeEl.innerText = `Prioridade: ${chamado.prioridade}`;
+      if (categoriaEl && chamado.categoria) categoriaEl.innerText = chamado.categoria;
+      if (prioridadeEl && chamado.prioridade) prioridadeEl.innerText = chamado.prioridade;
 
       if (badgeStatus) {
         badgeStatus.innerText = chamado.status;
@@ -48,17 +48,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   //auxiliares para o status visual
   function formatarClasseStatus(status) {
-    const s = status.toLowerCase();
+    const s = String(status || '').toLowerCase();
     if (s.includes('aberto')) return 'aberto';
-    if (s.includes('andamento')) return 'andamento';
+    if (s.includes('andamento') || s.includes('atendimento')) return 'andamento'; 
     return 'concluido';
   }
 
   function formatarValorSelect(status) {
-    const s = status.toLowerCase();
+    const s = String(status || '').toLowerCase();
     if (s.includes('aberto')) return 'aberto';
-    if (s.includes('andamento')) return 'andamento';
+    if (s.includes('andamento') || s.includes('atendimento')) return 'andamento';
     return 'concluido';
+  }
+
+  //converte valor do select para o status esperado pela api
+  function mapearStatusApi(valorSelect) {
+    if (valorSelect === 'aberto') return 'Aberto';
+    if (valorSelect === 'andamento') return 'Em Atendimento';
+    return 'Resolvido';
   }
 
   //funções feedback visual de erro no formulário
@@ -85,22 +92,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  //atualização do status na interface
+  //atualização do status na interface e na api
   if (selectStatus && badgeStatus) {
-    selectStatus.addEventListener('change', () => {
-      const novoStatus = selectStatus.value;
-      
-      badgeStatus.classList.remove('aberto', 'andamento', 'concluido');
+    selectStatus.addEventListener('change', async () => {
+      const novoStatusSelect = selectStatus.value;
+      const statusApi = mapearStatusApi(novoStatusSelect);
 
-      if (novoStatus === 'aberto') {
-        badgeStatus.textContent = 'Aberto';
-        badgeStatus.classList.add('aberto');
-      } else if (novoStatus === 'andamento') {
-        badgeStatus.textContent = 'Em Atendimento';
-        badgeStatus.classList.add('andamento');
-      } else if (novoStatus === 'concluido') {
-        badgeStatus.textContent = 'Concluído';
-        badgeStatus.classList.add('concluido');
+      badgeStatus.classList.remove('aberto', 'andamento', 'concluido');
+      badgeStatus.textContent = statusApi;
+      badgeStatus.classList.add(formatarClasseStatus(statusApi));
+
+      if (!chamadoId) return;
+
+      const resultado = await atualizarChamado(chamadoId, { status: statusApi });
+      if (!resultado.sucesso) {
+        mostrarErro(selectStatus, resultado.mensagem || 'Não foi possível atualizar o status.');
+      } else {
+        removerErro(selectStatus);
       }
     });
   }

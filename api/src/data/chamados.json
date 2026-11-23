@@ -1,0 +1,40 @@
+{
+  "chamados": [
+    {
+      "id": 101,
+      "titulo": "Computador não liga na recepção",
+      "categoria": "Hardware",
+      "prioridade": "Alta",
+      "status": "Aberto",
+      "descricao": "A estação de trabalho da recepção não apresenta sinal de energia ao pressionar o botão.",
+      "dataCriacao": "2026-11-20T10:00:00.000Z"
+    },
+    {
+      "id": 102,
+      "titulo": "Sem acesso à VPN corporativa",
+      "categoria": "Rede",
+      "prioridade": "Média",
+      "status": "Em Atendimento",
+      "descricao": "Usuário remoto recebe erro de autenticação ao tentar conectar na VPN.",
+      "dataCriacao": "2026-11-21T14:30:00.000Z"
+    },
+    {
+      "id": 103,
+      "titulo": "Impressora sem toner no financeiro",
+      "categoria": "Hardware",
+      "prioridade": "Média",
+      "status": "Aberto",
+      "descricao": "A impressora laser do financeiro pede troca de toner.",
+      "dataCriacao": "2026-11-22T15:11:51.419Z"
+    },
+    {
+      "id": 104,
+      "titulo": "Teste",
+      "categoria": "Acesso",
+      "prioridade": "Baixa",
+      "status": "Resolvido",
+      "descricao": "Teste de abertura de chamados",
+      "dataCriacao": "2026-11-22T17:39:54.245Z"
+    }
+  ]
+}

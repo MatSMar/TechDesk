@@ -7,10 +7,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectPrioridade = document.getElementById('prioridade');
   const textareaDescricao = document.getElementById('descricao');
 
+  //mapas para padronizar valores vindos do html
+  const mapaCategorias = {
+    hardware: 'Hardware',
+    software: 'Software',
+    rede: 'Rede',
+    acesso: 'Acesso',
+    outros: 'Outros',
+    geral: 'Outros'
+  };
+
+  const mapaPrioridades = {
+    baixa: 'Baixa',
+    média: 'Média',
+    media: 'Média',
+    alta: 'Alta',
+    crítica: 'Crítica',
+    critica: 'Crítica'
+  };
+
+  //normaliza categoria para o padrão da api
+  function normalizarCategoria(valor) {
+    const chave = String(valor || '').trim().toLowerCase();
+    return mapaCategorias[chave] || String(valor || '').trim();
+  }
+
+  //normaliza prioridade para o padrão da api
+  function normalizarPrioridade(valor) {
+    const chave = String(valor || '').trim().toLowerCase();
+    return mapaPrioridades[chave] || String(valor || '').trim();
+  }
+
   //funções exibir mensagem de erro abaixo do campo
   function mostrarErro(campo, mensagem) {
-    removerErro(campo); 
-    
+    removerErro(campo);
+
     campo.classList.add('input-error');
     const spanErro = document.createElement('span');
     spanErro.className = 'error-message';
@@ -34,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //envio do formulário
   form.addEventListener('submit', async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
 
     let formValido = true;
 
@@ -76,17 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
     //montagem do objeto do chamado
     const novoChamado = {
       titulo: tituloVal,
-      categoria: selectCategoria ? selectCategoria.value : 'Geral',
-      prioridade: selectPrioridade ? selectPrioridade.value : 'Média',
+      categoria: selectCategoria ? normalizarCategoria(selectCategoria.value) : 'Outros', 
+      prioridade: selectPrioridade ? normalizarPrioridade(selectPrioridade.value) : 'Média',
       status: 'Aberto',
-      descricao: descricaoVal,
-      dataCriacao: new Date().toISOString()
+      descricao: descricaoVal
     };
 
     //feedback visual de carregamento
     const botaoSubmit = form.querySelector('button[type="submit"]') || form.querySelector('.btn-submit');
     const textoOriginal = botaoSubmit ? botaoSubmit.innerText : 'Salvar';
-    
+
     if (botaoSubmit) {
       botaoSubmit.disabled = true;
       botaoSubmit.innerText = 'Salvando no servidor...';

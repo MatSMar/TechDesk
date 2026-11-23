@@ -15,24 +15,29 @@ Evita a perda de histórico, falhas de comunicação e desorganização decorren
 ## Tecnologias Utilizadas
 
 - **Frontend:** HTML5 Semântico, CSS3 (Design Responsivo, CSS Grid, Flexbox), JavaScript ES6+ (Módulos, Fetch API, Async/Await).
-- **Backend Simulado:** Node.js, JSON Server (`db.json`).
+- **Backend / API REST:** Node.js, Express, CORS e persistência em arquivo JSON (`chamados.json`).
+- **Testes de API:** Postman / Insomnia (`coleção.json`).
 - **Controle de Versão:** Git / GitHub.
 
 ## Instruções para Execução
 
-O projeto agora conta com comunicação assíncrona integrada a um servidor simulado. Para visualizar e testar a aplicação por completo:
+O projeto conta com uma API REST própria integrada ao front-end. Para visualizar e testar a aplicação por completo:
 
 1. Clone ou baixe o repositório em sua máquina.
 
-2. Certifique-se de ter o Node.js instalado e execute o servidor simulado na raiz do projeto:
+2. Certifique-se de ter o Node.js instalado, acesse a pasta da API, instale as dependências e inicie o servidor:
 
    ```bash
-   json-server --watch db.json --port 3000
+   cd api
+   npm install
+   npm start
    ```
 
-3. Com o servidor rodando, abra o arquivo `src/html/index.html` (ou utilize um servidor local como o Live Server) no seu navegador web.
+   A API iniciará por padrão em `http://localhost:3001`.
 
-4. As instruções detalhadas e evidências de cada etapa encontram-se na pasta `docs/`.
+3. Com o servidor rodando, abra o arquivo `src/html/index.html` utilizando um servidor local (como a extensão Live Server do VS Code) no seu navegador web.
+
+4. As instruções detalhadas, documentação dos endpoints, coleção de testes e evidências de cada etapa encontram-se na pasta `docs/`.
 
 ## Funcionalidades Implementadas
 
@@ -44,9 +49,11 @@ O projeto agora conta com comunicação assíncrona integrada a um servidor simu
 
 - **Etapa 04:** Interatividade e comportamentos dinâmicos com JavaScript (ES6+), validação de formulários em tempo real, filtros e linha do tempo interativa (`docs/etapa-04.md`).
 
-- **Etapa 05:** Modularização do código JavaScript, integração assíncrona com Fetch API (`async/await`), gestão de estados (carregamento, sucesso e erro) e persistência via servidor simulado (JSON Server).
+- **Etapa 05:** Modularização do código JavaScript, integração assíncrona com Fetch API (`async/await`), gestão de estados (carregamento, sucesso e erro) e protótipo inicial de comunicação com servidor (`docs/etapa-05.md`).
+
+- **Etapa 06:** Desenvolvimento da API REST em Node.js/Express (`POST /auth/login`, `GET /chamados`, `GET /chamados/:id`, `POST /chamados` e `PATCH /chamados/:id`), integração completa entre front-end e back-end, atualização dinâmica dos indicadores da dashboard e documentação de endpoints com coleção Postman/Insomnia (`docs/etapa-06.md`).
 
 ## Limitações Conhecidas
 
-- Esta entrega refere-se à **Etapa 05 (Modularização e Comunicação Assíncrona)**.
-- A persistência e as requisições utilizam um ambiente simulado local (`db.json` via JSON Server) como preparação para o backend definitivo nas próximas fases.
+- Esta entrega refere-se à **Etapa 06 (Desenvolvimento de API REST e Integração)**.
+- A persistência dos dados na API utiliza armazenamento local em arquivo JSON (`chamados.json`), preparando o sistema para a migração para banco de dados relacional/persistente e regras de controle de acesso por perfil na próxima etapa.

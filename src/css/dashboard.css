@@ -141,7 +141,7 @@
 }
 
 .badge-status.andamento {
-  background-color: var(--status-andamento);
+  background-color: #D97706;
 }
 
 .badge-status.concluido {

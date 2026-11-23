@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-4789-8012-3456789abcde",
+    "name": "TechDesk API",
+    "description": "Coleção de requisições da API REST do sistema TechDesk (Gerenciamento de Chamados de TI).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Login de Usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tecnico@techdesk.com\",\n  \"senha\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chamados",
+      "item": [
+        {
+          "name": "Listar Todos os Chamados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/chamados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chamados"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Chamados com Filtros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/chamados?status=Aberto&prioridade=Alta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chamados"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Aberto"
+                },
+                {
+                  "key": "prioridade",
+                  "value": "Alta"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Chamado por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/chamados/101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chamados",
+                "101"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Novo Chamado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Computador não conecta na rede Wi-Fi\",\n  \"categoria\": \"Rede\",\n  \"prioridade\": \"Alta\",\n  \"descricao\": \"Estação de trabalho do financeiro perdeu conexão com a rede interna.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chamados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chamados"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Status do Chamado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Em Atendimento\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chamados/101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chamados",
+                "101"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

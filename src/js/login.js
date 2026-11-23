@@ -1,3 +1,5 @@
+import { autenticarUsuario } from './services/api.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const formLogin = document.querySelector('form');
   const inputEmail = document.getElementById('email') || document.querySelector('input[type="email"]');
@@ -27,12 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (formLogin) {
-    formLogin.addEventListener('submit', (event) => {
-      let valido = true;
+    formLogin.addEventListener('submit', async (event) => { 
+      event.preventDefault(); 
 
-      // Validação do E-mail
+      let valido = true;
+      const emailVal = inputEmail ? inputEmail.value.trim() : '';
+      const senhaVal = inputSenha ? inputSenha.value.trim() : '';
+
+      //validação do email
       if (inputEmail) {
-        const emailVal = inputEmail.value.trim();
         if (emailVal === '') {
           mostrarErro(inputEmail, 'O e-mail é obrigatório.');
           valido = false;
@@ -44,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Validação da Senha
+      //validação da senha
       if (inputSenha) {
-        if (inputSenha.value.trim() === '') {
+        if (senhaVal === '') {
           mostrarErro(inputSenha, 'A senha é obrigatória.');
           valido = false;
         } else {
@@ -54,13 +59,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Se houver erros, impede o redirecionamento
-      if (!valido) {
-        event.preventDefault();
+      if (!valido) return;
+
+      const botaoSubmit = formLogin.querySelector('button[type="submit"]') || formLogin.querySelector('.btn-submit');
+      const textoOriginal = botaoSubmit ? botaoSubmit.innerText : 'Entrar';
+
+      if (botaoSubmit) {
+        botaoSubmit.disabled = true;
+        botaoSubmit.innerText = 'Entrando...';
+      }
+      //valida credenciais no servidor
+      const resultado = await autenticarUsuario(emailVal, senhaVal); 
+
+      if (resultado.sucesso) {
+        //guarda sessão simples do usuário
+        localStorage.setItem('techdesk_usuario', JSON.stringify(resultado.dados.usuario)); 
+        window.location.href = 'dashboard.html';
+      } else {
+        if (inputSenha) {
+          //exibe erro retornado pela API
+          mostrarErro(inputSenha, resultado.mensagem || 'E-mail ou senha inválidos.'); 
+        }
+        if (botaoSubmit) {
+          botaoSubmit.disabled = false;
+          botaoSubmit.innerText = textoOriginal;
+        }
       }
     });
 
-    // Limpa erros ao digitar
+    //limpa erros ao digitar
     [inputEmail, inputSenha].forEach((campo) => {
       if (campo) {
         campo.addEventListener('input', () => removerErro(campo));

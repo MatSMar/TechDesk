@@ -15,40 +15,41 @@
   <header class="main-header">
     <div class="logo">
       <h1>TechDesk</h1>
+      <span id="info-usuario-logado" style="display: block; font-size: 0.8rem; opacity: 0.9;"></span>
     </div>
     <nav class="main-nav">
       <ul>
         <li><a href="dashboard.html" class="active">Dashboard</a></li>
         <li><a href="novo_chamado.html">Abrir Chamado</a></li>
-        <li><a href="index.html">Sair</a></li>
+        <li><a href="index.html" id="btn-sair">Sair</a></li>
       </ul>
     </nav>
   </header>
 
   <main class="app-container">
     <!-- seção de cards com estatísticas gerais -->
-    <section class="stats-grid">
+    <section class="stats-grid" aria-label="Indicadores de chamados">
       <article class="stat-card">
         <span class="stat-title">Total</span>
-        <span class="stat-value">12</span>
+        <span class="stat-value">0</span>
       </article>
       <article class="stat-card">
         <span class="stat-title">Abertos</span>
-        <span class="stat-value">4</span>
+        <span class="stat-value">0</span>
       </article>
       <article class="stat-card">
         <span class="stat-title">Em Atendimento</span>
-        <span class="stat-value">3</span>
+        <span class="stat-value">0</span>
       </article>
       <article class="stat-card">
         <span class="stat-title">Resolvidos</span>
-        <span class="stat-value">5</span>
+        <span class="stat-value">0</span>
       </article>
     </section>
 
     <!-- seção de filtros e busca de chamados -->
     <section class="controls-section">
-      <h2>Visão de Chamados</h2>
+      <h2 id="titulo-visao-chamados">Visão de Chamados</h2>
       <form class="filter-form" onsubmit="event.preventDefault();">
         <div class="form-group-inline">
           <label for="filtro-visao">Exibir:</label>
@@ -62,7 +63,7 @@
 
         <div class="form-group-inline">
           <label for="busca">Buscar:</label>
-          <input type="text" id="busca" name="q" placeholder="Número ou título...">
+          <input type="text" id="busca" name="q" placeholder="Número, título ou solicitante...">
         </div>
 
         <div class="filter-actions">
@@ -79,30 +80,14 @@
             <tr>
               <th>#ID</th>
               <th>Título</th>
+              <th id="th-solicitante">Solicitante</th>
               <th>Categoria</th>
               <th>Prioridade</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>#101</td>
-              <td>Impressora do setor de vendas não liga</td>
-              <td>Hardware</td>
-              <td>Alta</td>
-              <td><span class="badge-status aberto">Aberto</span></td>
-              <td><a href="detalhes_chamado.html" class="ticket-link">Ver Detalhes</a></td>
-            </tr>
-            <tr>
-              <td>#102</td>
-              <td>Sem acesso ao sistema ERP</td>
-              <td>Software</td>
-              <td>Média</td>
-              <td><span class="badge-status andamento">Em Atendimento</span></td>
-              <td><a href="detalhes_chamado.html" class="ticket-link">Ver Detalhes</a></td>
-            </tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </section>

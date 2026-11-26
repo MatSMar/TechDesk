@@ -1,13 +1,38 @@
 import { criarChamado } from './services/api.js';
 
+const STORAGE_USUARIO_KEY = 'techdesk_usuario';
+
+function obterUsuarioLogado() {
+  try {
+    const bruto = localStorage.getItem(STORAGE_USUARIO_KEY);
+    return bruto ? JSON.parse(bruto) : null;
+  } catch {
+    return null;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  const usuario = obterUsuarioLogado();
+  if (!usuario || !usuario.id) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const btnSair = document.getElementById('btn-sair');
+  if (btnSair) {
+    btnSair.addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem(STORAGE_USUARIO_KEY);
+      window.location.href = 'index.html';
+    });
+  }
+
   const form = document.querySelector('form');
   const inputTitulo = document.getElementById('titulo');
   const selectCategoria = document.getElementById('categoria');
   const selectPrioridade = document.getElementById('prioridade');
   const textareaDescricao = document.getElementById('descricao');
 
-  //mapas para padronizar valores vindos do html
   const mapaCategorias = {
     hardware: 'Hardware',
     software: 'Software',
@@ -26,19 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
     critica: 'Crítica'
   };
 
-  //normaliza categoria para o padrão da api
   function normalizarCategoria(valor) {
     const chave = String(valor || '').trim().toLowerCase();
     return mapaCategorias[chave] || String(valor || '').trim();
   }
 
-  //normaliza prioridade para o padrão da api
   function normalizarPrioridade(valor) {
     const chave = String(valor || '').trim().toLowerCase();
     return mapaPrioridades[chave] || String(valor || '').trim();
   }
 
-  //funções exibir mensagem de erro abaixo do campo
   function mostrarErro(campo, mensagem) {
     removerErro(campo);
 
@@ -54,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
     campo.parentElement.appendChild(spanErro);
   }
 
-  //remover mensagem de erro do campo
   function removerErro(campo) {
     campo.classList.remove('input-error');
     const spanExistente = campo.parentElement.querySelector('.error-message');
@@ -63,13 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  //envio do formulário
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     let formValido = true;
 
-    //validação do título
     const tituloVal = inputTitulo ? inputTitulo.value.trim() : '';
     if (tituloVal === '') {
       mostrarErro(inputTitulo, 'O título do chamado é obrigatório.');
@@ -81,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
       removerErro(inputTitulo);
     }
 
-    //validação da categoria
     if (selectCategoria && selectCategoria.value === '') {
       mostrarErro(selectCategoria, 'Por favor, selecione uma categoria.');
       formValido = false;
@@ -89,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
       removerErro(selectCategoria);
     }
 
-    //validação da descrição
     const descricaoVal = textareaDescricao ? textareaDescricao.value.trim() : '';
     if (descricaoVal === '') {
       mostrarErro(textareaDescricao, 'A descrição detalhada é obrigatória.');
@@ -101,19 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
       removerErro(textareaDescricao);
     }
 
-    //interrompe o envio se houver erros
     if (!formValido) return;
 
-    //montagem do objeto do chamado
     const novoChamado = {
       titulo: tituloVal,
-      categoria: selectCategoria ? normalizarCategoria(selectCategoria.value) : 'Outros', 
+      categoria: selectCategoria ? normalizarCategoria(selectCategoria.value) : 'Outros',
       prioridade: selectPrioridade ? normalizarPrioridade(selectPrioridade.value) : 'Média',
       status: 'Aberto',
-      descricao: descricaoVal
+      descricao: descricaoVal,
+      solicitanteId: usuario.id
     };
 
-    //feedback visual de carregamento
     const botaoSubmit = form.querySelector('button[type="submit"]') || form.querySelector('.btn-submit');
     const textoOriginal = botaoSubmit ? botaoSubmit.innerText : 'Salvar';
 
@@ -122,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
       botaoSubmit.innerText = 'Salvando no servidor...';
     }
 
-    //post para o servidor
     const resultado = await criarChamado(novoChamado);
 
     if (resultado.sucesso) {
@@ -137,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  //limpa mensagens de erro conforme o usuário digita ou altera os campos
   [inputTitulo, selectCategoria, selectPrioridade, textareaDescricao].forEach((campo) => {
     if (campo) {
       campo.addEventListener('input', () => removerErro(campo));

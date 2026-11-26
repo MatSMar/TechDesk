@@ -1,7 +1,7 @@
 const API_BASE_URL = 'http://localhost:3001';
 const CHAMADOS_URL = `${API_BASE_URL}/chamados`;
 
-//busca todos os chamados
+// Busca chamados (suporta filtros e escopo por perfil/usuário)
 export async function buscarChamados(filtros = {}) {
   try {
     const params = new URLSearchParams();
@@ -9,6 +9,8 @@ export async function buscarChamados(filtros = {}) {
     if (filtros.prioridade) params.set('prioridade', filtros.prioridade);
     if (filtros.categoria) params.set('categoria', filtros.categoria);
     if (filtros.busca) params.set('busca', filtros.busca);
+    if (filtros.usuarioId) params.set('usuarioId', filtros.usuarioId);
+    if (filtros.perfil) params.set('perfil', filtros.perfil);
 
     const url = params.toString() ? `${CHAMADOS_URL}?${params.toString()}` : CHAMADOS_URL;
     const resposta = await fetch(url);
@@ -25,7 +27,7 @@ export async function buscarChamados(filtros = {}) {
   }
 }
 
-//cria um novo chamado no backend
+// Cria um novo chamado no backend
 export async function criarChamado(novoChamado) {
   try {
     const resposta = await fetch(CHAMADOS_URL, {
@@ -48,7 +50,7 @@ export async function criarChamado(novoChamado) {
   }
 }
 
-//busca um chamado específico pelo id
+// Busca um chamado específico pelo ID (já inclui interações quando retornado pelo backend)
 export async function buscarChamadoPorId(id) {
   try {
     const resposta = await fetch(`${CHAMADOS_URL}/${id}`);
@@ -65,7 +67,7 @@ export async function buscarChamadoPorId(id) {
   }
 }
 
-//atualiza parcialmente um chamado
+// Atualiza parcialmente um chamado
 export async function atualizarChamado(id, dadosAtualizados) {
   try {
     const resposta = await fetch(`${CHAMADOS_URL}/${id}`, {
@@ -88,7 +90,47 @@ export async function atualizarChamado(id, dadosAtualizados) {
   }
 }
 
-//autentica usuário no backend
+// Lista interações / mensagens de um chamado
+export async function buscarInteracoesChamado(chamadoId) {
+  try {
+    const resposta = await fetch(`${CHAMADOS_URL}/${chamadoId}/interacoes`);
+    const corpo = await resposta.json().catch(() => ({}));
+
+    if (!resposta.ok) {
+      throw new Error(corpo.mensagem || 'Erro ao carregar o histórico de interações.');
+    }
+
+    return { sucesso: true, dados: corpo };
+  } catch (error) {
+    console.error('Erro na requisição GET /chamados/:id/interacoes:', error);
+    return { sucesso: false, mensagem: error.message || 'Não foi possível carregar as interações.' };
+  }
+}
+
+// Cria uma nova mensagem/interação em um chamado
+export async function criarInteracaoChamado(chamadoId, { mensagem, autorId }) {
+  try {
+    const resposta = await fetch(`${CHAMADOS_URL}/${chamadoId}/interacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensagem, autorId })
+    });
+
+    const corpo = await resposta.json().catch(() => ({}));
+
+    if (!resposta.ok) {
+      const detalhe = Array.isArray(corpo.detalhes) ? corpo.detalhes.join(' ') : corpo.mensagem;
+      throw new Error(detalhe || `Erro ao enviar mensagem (${resposta.status})`);
+    }
+
+    return { sucesso: true, dados: corpo };
+  } catch (error) {
+    console.error('Erro na requisição POST /chamados/:id/interacoes:', error);
+    return { sucesso: false, mensagem: error.message || 'Não foi possível enviar a mensagem.' };
+  }
+}
+
+// Autentica usuário no backend
 export async function autenticarUsuario(email, senha) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/auth/login`, {

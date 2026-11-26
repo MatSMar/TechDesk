@@ -6,7 +6,7 @@
   <meta name="description" content="Detalhamento e histórico de atendimento de chamado no TechDesk.">
   <meta name="keywords" content="TechDesk, Detalhes do Chamado, Histórico, Atendimento TI">
   <meta name="author" content="Matheus S. Marques">
-  <title>TechDesk - Detalhes do Chamado #101</title>
+  <title>TechDesk - Detalhes do Chamado</title>
 
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/form.css">
@@ -15,57 +15,51 @@
   <header class="main-header">
     <div class="logo">
       <h1>TechDesk</h1>
+      <span id="info-usuario-logado" style="display: block; font-size: 0.8rem; opacity: 0.9;"></span>
     </div>
     <nav class="main-nav">
       <ul>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="novo_chamado.html">Abrir Chamado</a></li>
-        <li><a href="index.html">Sair</a></li>
+        <li><a href="index.html" id="btn-sair">Sair</a></li>
       </ul>
     </nav>
   </header>
 
   <main class="app-container">
     <div class="details-layout">
-      <!-- coluna principal: detalhes e histórico -->
+      <!-- coluna principal: detalhes e bate-papo/histórico -->
       <section class="details-main">
         <div class="form-header">
-          <h2>Chamado #101 — Impressora do setor de vendas não liga</h2>
+          <h2>Carregando chamado...</h2>
         </div>
 
         <div class="ticket-description">
           <div class="ticket-info-item">
             <label>Descrição Original do Solicitante:</label>
-            <p id="detalhe-descricao">A impressora de etiquetas do setor de vendas parou de responder hoje pela manhã. O LED indicador de energia nem mesmo acende.</p>
+            <p id="detalhe-descricao"></p>
           </div>
         </div>
 
         <!-- seção de histórico e interações -->
         <section class="timeline">
-          <h3>Histórico de Atendimento</h3>
-          
-          <article class="timeline-item">
-            <div class="timeline-meta">
-              <strong>Técnico de TI (Carlos)</strong>
-              <span>Hoje às 09:30</span>
-            </div>
-            <p>Chamado atribuído à equipe de Hardware. Solicitada verificação do cabo de força no local.</p>
-          </article>
+          <h3>Histórico e Mensagens do Chamado</h3>
+          <div id="lista-interacoes" style="display: flex; flex-direction: column; gap: 1rem;"></div>
         </section>
 
-        <!-- formulário para inserir nova resposta -->
+        <!-- formulário para inserir nova mensagem/parecer -->
         <form action="detalhes_chamado.html" method="POST" class="form-grid" style="margin-top: 2rem;" novalidate>
           <div class="form-group">
-            <label for="comentario">Adicionar Atualização / Parecer Técnico:</label>
-            <textarea id="comentario" name="comentario" placeholder="Escreva uma resposta ou atualização do status..." required></textarea>
+            <label for="comentario">Enviar Mensagem / Parecer Técnico:</label>
+            <textarea id="comentario" name="comentario" placeholder="Escreva uma dúvida, observação ou parecer técnico..." required></textarea>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Adicionar Resposta</button>
+            <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
           </div>
         </form>
       </section>
 
-      <!-- coluna lateral: status e informações-->
+      <!-- coluna lateral: status e informações -->
       <aside class="details-sidebar">
         <div class="ticket-info-item">
           <label>Status Atual:</label>
@@ -74,30 +68,32 @@
 
         <div class="ticket-info-item">
           <label>Categoria:</label>
-          <span id="detalhe-categoria">Hardware</span>
+          <span id="detalhe-categoria">—</span>
         </div>
 
         <div class="ticket-info-item">
           <label>Prioridade:</label>
-          <span id="detalhe-prioridade">Alta</span>
+          <span id="detalhe-prioridade">—</span>
         </div>
 
         <div class="ticket-info-item">
           <label>Solicitante:</label>
-          <span>Ana Maria (Vendas)</span>
+          <span id="detalhe-solicitante">—</span>
         </div>
 
         <div class="ticket-info-item">
           <label>Data de Abertura:</label>
-          <span>09/09/2026 às 08:15</span>
+          <span id="detalhe-data">—</span>
         </div>
 
-        <div class="form-group" style="margin-top: 1.5rem;">
+        <div id="box-alterar-status" class="form-group" style="margin-top: 1.5rem; display: none;">
           <label for="alterar-status">Alterar Status (Técnico):</label>
           <select id="alterar-status" name="novo_status">
-            <option value="aberto" selected>Aberto</option>
-            <option value="andamento">Em Atendimento</option>
-            <option value="concluido">Concluído</option>
+            <option value="Aberto">Aberto</option>
+            <option value="Em Atendimento">Em Atendimento</option>
+            <option value="Aguardando Usuário">Aguardando Usuário</option>
+            <option value="Resolvido">Resolvido</option>
+            <option value="Fechado">Fechado</option>
           </select>
         </div>
       </aside>

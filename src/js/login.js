@@ -1,9 +1,33 @@
 import { autenticarUsuario } from './services/api.js';
 
+const STORAGE_EMAIL_KEY = 'techdesk_email_lembrado';
+const STORAGE_USUARIO_KEY = 'techdesk_usuario';
+
 document.addEventListener('DOMContentLoaded', () => {
   const formLogin = document.querySelector('form');
   const inputEmail = document.getElementById('email') || document.querySelector('input[type="email"]');
   const inputSenha = document.getElementById('senha') || document.querySelector('input[type="password"]');
+  const checkboxLembrar = document.getElementById('lembrar') || document.querySelector('input[name="lembrar"]');
+  const linkEsqueceuSenha = document.getElementById('esqueceu-senha');
+  const avisoRecuperacao = document.getElementById('aviso-recuperacao');
+
+  // Preenche o e-mail caso "Lembrar de mim" tenha sido usado anteriormente
+  const emailSalvo = localStorage.getItem(STORAGE_EMAIL_KEY);
+  if (emailSalvo && inputEmail) {
+    inputEmail.value = emailSalvo;
+    if (checkboxLembrar) {
+      checkboxLembrar.checked = true;
+    }
+  }
+
+  if (linkEsqueceuSenha && avisoRecuperacao) {
+    linkEsqueceuSenha.addEventListener('click', (event) => {
+      event.preventDefault();
+      avisoRecuperacao.textContent =
+        'A recuperação automática de senha não está disponível nesta versão. Procure a equipe de TI para redefinir seu acesso.';
+      avisoRecuperacao.style.display = 'block';
+    });
+  }
 
   function mostrarErro(campo, mensagem) {
     removerErro(campo);
@@ -29,14 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (formLogin) {
-    formLogin.addEventListener('submit', async (event) => { 
-      event.preventDefault(); 
+    formLogin.addEventListener('submit', async (event) => {
+      event.preventDefault();
 
       let valido = true;
       const emailVal = inputEmail ? inputEmail.value.trim() : '';
       const senhaVal = inputSenha ? inputSenha.value.trim() : '';
 
-      //validação do email
       if (inputEmail) {
         if (emailVal === '') {
           mostrarErro(inputEmail, 'O e-mail é obrigatório.');
@@ -49,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      //validação da senha
       if (inputSenha) {
         if (senhaVal === '') {
           mostrarErro(inputSenha, 'A senha é obrigatória.');
@@ -68,17 +90,21 @@ document.addEventListener('DOMContentLoaded', () => {
         botaoSubmit.disabled = true;
         botaoSubmit.innerText = 'Entrando...';
       }
-      //valida credenciais no servidor
-      const resultado = await autenticarUsuario(emailVal, senhaVal); 
+
+      const resultado = await autenticarUsuario(emailVal, senhaVal);
 
       if (resultado.sucesso) {
-        //guarda sessão simples do usuário
-        localStorage.setItem('techdesk_usuario', JSON.stringify(resultado.dados.usuario)); 
+        if (checkboxLembrar && checkboxLembrar.checked) {
+          localStorage.setItem(STORAGE_EMAIL_KEY, emailVal);
+        } else {
+          localStorage.removeItem(STORAGE_EMAIL_KEY);
+        }
+
+        localStorage.setItem(STORAGE_USUARIO_KEY, JSON.stringify(resultado.dados.usuario));
         window.location.href = 'dashboard.html';
       } else {
         if (inputSenha) {
-          //exibe erro retornado pela API
-          mostrarErro(inputSenha, resultado.mensagem || 'E-mail ou senha inválidos.'); 
+          mostrarErro(inputSenha, resultado.mensagem || 'E-mail ou senha inválidos.');
         }
         if (botaoSubmit) {
           botaoSubmit.disabled = false;
@@ -87,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    //limpa erros ao digitar
     [inputEmail, inputSenha].forEach((campo) => {
       if (campo) {
         campo.addEventListener('input', () => removerErro(campo));

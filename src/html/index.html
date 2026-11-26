@@ -32,11 +32,13 @@
         </div>
 
         <div class="login-footer-links">
-          <label style="font-weight: normal; font-size: 0.85rem; cursor: pointer;">
-            <input type="checkbox" name="lembrar" style="width: auto; margin-right: 0.3rem;"> Lembrar de mim
+          <label for="lembrar" style="font-weight: normal; font-size: 0.85rem; cursor: pointer;">
+            <input type="checkbox" id="lembrar" name="lembrar" style="width: auto; margin-right: 0.3rem;"> Lembrar de mim
           </label>
-          <a href="#">Esqueceu a senha?</a>
+          <a href="#" id="esqueceu-senha">Esqueceu a senha?</a>
         </div>
+
+        <p id="aviso-recuperacao" style="display: none; font-size: 0.82rem; color: var(--color-text-muted); background-color: var(--color-bg); border-left: 3px solid var(--color-primary); padding: 0.6rem 0.75rem; border-radius: 4px;"></p>
 
         <div class="login-btn-container">
           <button type="submit" class="btn btn-primary">Entrar no Sistema</button>
@@ -44,7 +46,7 @@
       </form>
     </main>
   </div>
-  
+
   <script type="module" src="../js/login.js"></script>
 
 </body>

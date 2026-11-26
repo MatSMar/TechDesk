@@ -1,18 +1,20 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {
+  listarChamadosDb,
+  buscarChamadoPorIdDb,
+  criarChamadoDb,
+  atualizarChamadoDb,
+  removerChamadoDb
+} from '../repositories/chamados.repository.js';
+import {
+  listarInteracoesPorChamadoDb,
+  criarInteracaoChamadoDb
+} from '../repositories/interacoes.repository.js';
+import { buscarUsuarioPorId } from '../repositories/usuarios.repository.js';
 
-//resolve o caminho do arquivo json
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DATA_PATH = path.resolve(__dirname, '../data/chamados.json');
-
-//valores permitidos pros campos
 const CATEGORIAS_VALIDAS = ['Hardware', 'Software', 'Rede', 'Acesso', 'Outros'];
 const PRIORIDADES_VALIDAS = ['Baixa', 'Média', 'Alta', 'Crítica'];
 const STATUS_VALIDOS = ['Aberto', 'Em Atendimento', 'Aguardando Usuário', 'Resolvido', 'Fechado'];
 
-//cria objeto de erro
 function criarErro(statusCode, erro, mensagem, detalhes = null) {
   const err = new Error(mensagem);
   err.statusCode = statusCode;
@@ -21,19 +23,6 @@ function criarErro(statusCode, erro, mensagem, detalhes = null) {
   return err;
 }
 
-//le os chamados salvos no json
-async function lerChamados() {
-  const conteudo = await fs.readFile(DATA_PATH, 'utf-8');
-  const dados = JSON.parse(conteudo);
-  return Array.isArray(dados.chamados) ? dados.chamados : [];
-}
-
-//grava a lista atualizada de chamados no json
-async function salvarChamados(chamados) {
-  await fs.writeFile(DATA_PATH, JSON.stringify({ chamados }, null, 2), 'utf-8');
-}
-
-//verifica se o id informado na url é inteiro positivo
 function validarId(idParam) {
   const id = Number(idParam);
   if (!Number.isInteger(id) || id <= 0) {
@@ -42,7 +31,6 @@ function validarId(idParam) {
   return id;
 }
 
-//valida campos obrigatórios ou parciais do chamado
 function validarPayloadChamado(body, { parcial = false } = {}) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw criarErro(400, 'Requisição inválida', 'O corpo da requisição deve ser um objeto JSON válido.');
@@ -93,8 +81,32 @@ function validarPayloadChamado(body, { parcial = false } = {}) {
     }
   }
 
+  if (!parcial) {
+    const solicitanteRaw = body.solicitanteId ?? body.solicitante_id ?? 2;
+    const solicitanteId = Number(solicitanteRaw);
+    if (!Number.isInteger(solicitanteId) || solicitanteId <= 0) {
+      erros.push('O campo "solicitanteId" deve ser um número inteiro positivo.');
+    } else {
+      dadosValidados.solicitanteId = solicitanteId;
+    }
+  }
+
+  if (Object.hasOwn(body, 'tecnicoId') || Object.hasOwn(body, 'tecnico_id')) {
+    const tecnicoRaw = body.tecnicoId ?? body.tecnico_id;
+    if (tecnicoRaw === null || tecnicoRaw === '') {
+      dadosValidados.tecnico_id = null;
+    } else {
+      const tecnicoId = Number(tecnicoRaw);
+      if (!Number.isInteger(tecnicoId) || tecnicoId <= 0) {
+        erros.push('O campo "tecnicoId" deve ser um número inteiro positivo ou nulo.');
+      } else {
+        dadosValidados.tecnico_id = tecnicoId;
+      }
+    }
+  }
+
   if (parcial && Object.keys(dadosValidados).length === 0 && erros.length === 0) {
-    erros.push('Envie ao menos um campo válido para atualização (titulo, categoria, prioridade, status ou descricao).');
+    erros.push('Envie ao menos um campo válido para atualização.');
   }
 
   if (erros.length > 0) {
@@ -104,149 +116,168 @@ function validarPayloadChamado(body, { parcial = false } = {}) {
   return dadosValidados;
 }
 
-//lista chamados com filtros
+function traduzirErroBanco(err, next) {
+  if (err?.code === 'ER_NO_REFERENCED_ROW_2') {
+    return next(criarErro(400, 'Referência inválida', 'O usuário informado não existe na base de dados.'));
+  }
+  if (err?.code === 'ER_ROW_IS_REFERENCED_2') {
+    return next(criarErro(409, 'Conflito de integridade', 'Este registro está vinculado a outros dados e não pode ser removido.'));
+  }
+  if (err?.code === 'ECONNREFUSED' || err?.code === 'ER_ACCESS_DENIED_ERROR') {
+    return next(criarErro(503, 'Serviço de banco indisponível', 'Não foi possível conectar ao banco de dados MySQL.'));
+  }
+  return next(err);
+}
+
 export async function listarChamados(req, res, next) {
   try {
-    let chamados = await lerChamados();
-
-    const { status, prioridade, categoria, busca } = req.query;
-
-    if (status) {
-      chamados = chamados.filter((c) => c.status.toLowerCase() === String(status).toLowerCase());
-    }
-    if (prioridade) {
-      chamados = chamados.filter((c) => c.prioridade.toLowerCase() === String(prioridade).toLowerCase());
-    }
-    if (categoria) {
-      chamados = chamados.filter((c) => c.categoria.toLowerCase() === String(categoria).toLowerCase());
-    }
-    if (busca) {
-      const termo = String(busca).toLowerCase().trim();
-      chamados = chamados.filter(
-        (c) =>
-          c.titulo.toLowerCase().includes(termo) ||
-          c.descricao.toLowerCase().includes(termo) ||
-          String(c.id).includes(termo)
-      );
-    }
-
+    const { status, prioridade, categoria, busca, usuarioId, perfil } = req.query;
+    const chamados = await listarChamadosDb({
+      status,
+      prioridade,
+      categoria,
+      busca,
+      usuarioId: usuarioId ? Number(usuarioId) : undefined,
+      perfil
+    });
     res.status(200).json(chamados);
   } catch (err) {
-    next(err);
+    traduzirErroBanco(err, next);
   }
 }
 
-//busca um chamado pelo id
 export async function buscarChamadoPorId(req, res, next) {
   try {
     const id = validarId(req.params.id);
-    const chamados = await lerChamados();
-    const chamado = chamados.find((c) => Number(c.id) === id);
+    const chamado = await buscarChamadoPorIdDb(id);
 
     if (!chamado) {
       throw criarErro(404, 'Recurso não encontrado', `Chamado com id ${id} não foi encontrado.`);
     }
 
-    res.status(200).json(chamado);
+    const interacoes = await listarInteracoesPorChamadoDb(id);
+    res.status(200).json({ ...chamado, interacoes });
   } catch (err) {
-    next(err);
+    traduzirErroBanco(err, next);
   }
 }
 
-//cria um novo chamado e persiste no json
 export async function criarChamado(req, res, next) {
   try {
     const dados = validarPayloadChamado(req.body, { parcial: false });
-    const chamados = await lerChamados();
 
-    const maiorId = chamados.reduce((max, item) => Math.max(max, Number(item.id) || 0), 100);
-    const novoChamado = {
-      id: maiorId + 1,
-      ...dados,
-      dataCriacao: new Date().toISOString()
-    };
+    const solicitante = await buscarUsuarioPorId(dados.solicitanteId);
+    if (!solicitante) {
+      throw criarErro(400, 'Solicitante inválido', `Usuário solicitante com id ${dados.solicitanteId} não encontrado.`);
+    }
 
-    chamados.push(novoChamado);
-    await salvarChamados(chamados);
-
+    const novoChamado = await criarChamadoDb(dados);
     res.status(201).json(novoChamado);
   } catch (err) {
-    next(err);
+    traduzirErroBanco(err, next);
   }
 }
 
-//substitui todos os campos editáveis de um chamado existente
 export async function substituirChamado(req, res, next) {
   try {
     const id = validarId(req.params.id);
     const dados = validarPayloadChamado(req.body, { parcial: false });
-    const chamados = await lerChamados();
-    const indice = chamados.findIndex((c) => Number(c.id) === id);
+    const atualizado = await atualizarChamadoDb(id, dados);
 
-    if (indice === -1) {
+    if (!atualizado) {
       throw criarErro(404, 'Recurso não encontrado', `Chamado com id ${id} não foi encontrado.`);
     }
 
-    const atualizado = {
-      id: chamados[indice].id,
-      ...dados,
-      dataCriacao: chamados[indice].dataCriacao
-    };
-
-    chamados[indice] = atualizado;
-    await salvarChamados(chamados);
-
     res.status(200).json(atualizado);
   } catch (err) {
-    next(err);
+    traduzirErroBanco(err, next);
   }
 }
 
-//atualiza apenas os campos enviados no corpo da requisição
 export async function atualizarParcialChamado(req, res, next) {
   try {
     const id = validarId(req.params.id);
     const dados = validarPayloadChamado(req.body, { parcial: true });
-    const chamados = await lerChamados();
-    const indice = chamados.findIndex((c) => Number(c.id) === id);
+    const atualizado = await atualizarChamadoDb(id, dados);
 
-    if (indice === -1) {
+    if (!atualizado) {
       throw criarErro(404, 'Recurso não encontrado', `Chamado com id ${id} não foi encontrado.`);
     }
-
-    const atualizado = {
-      ...chamados[indice],
-      ...dados
-    };
-
-    chamados[indice] = atualizado;
-    await salvarChamados(chamados);
 
     res.status(200).json(atualizado);
   } catch (err) {
-    next(err);
+    traduzirErroBanco(err, next);
   }
 }
 
-//remove um chamado pelo ID
 export async function removerChamado(req, res, next) {
   try {
     const id = validarId(req.params.id);
-    const chamados = await lerChamados();
-    const indice = chamados.findIndex((c) => Number(c.id) === id);
+    const removido = await removerChamadoDb(id);
 
-    if (indice === -1) {
+    if (!removido) {
       throw criarErro(404, 'Recurso não encontrado', `Chamado com id ${id} não foi encontrado.`);
     }
-
-    const [removido] = chamados.splice(indice, 1);
-    await salvarChamados(chamados);
 
     res.status(200).json({
       mensagem: `Chamado #${id} removido com sucesso.`,
       chamado: removido
     });
   } catch (err) {
-    next(err);
+    traduzirErroBanco(err, next);
+  }
+}
+
+export async function listarInteracoesChamado(req, res, next) {
+  try {
+    const id = validarId(req.params.id);
+    const chamado = await buscarChamadoPorIdDb(id);
+
+    if (!chamado) {
+      throw criarErro(404, 'Recurso não encontrado', `Chamado com id ${id} não foi encontrado.`);
+    }
+
+    const interacoes = await listarInteracoesPorChamadoDb(id);
+    res.status(200).json(interacoes);
+  } catch (err) {
+    traduzirErroBanco(err, next);
+  }
+}
+
+export async function adicionarInteracaoChamado(req, res, next) {
+  try {
+    const id = validarId(req.params.id);
+    const chamado = await buscarChamadoPorIdDb(id);
+
+    if (!chamado) {
+      throw criarErro(404, 'Recurso não encontrado', `Chamado com id ${id} não foi encontrado.`);
+    }
+
+    const { mensagem, autorId, autor_id } = req.body || {};
+    const mensagemLimpa = String(mensagem || '').trim();
+    const autorIdNum = Number(autorId ?? autor_id);
+
+    if (!mensagemLimpa) {
+      throw criarErro(400, 'Erro de validação', 'O campo "mensagem" é obrigatório.');
+    }
+
+    if (!Number.isInteger(autorIdNum) || autorIdNum <= 0) {
+      throw criarErro(400, 'Erro de validação', 'O campo "autorId" deve ser um número inteiro positivo.');
+    }
+
+    const autor = await buscarUsuarioPorId(autorIdNum);
+    if (!autor) {
+      throw criarErro(400, 'Autor inválido', `Usuário autor com id ${autorIdNum} não encontrado.`);
+    }
+
+    const interacao = await criarInteracaoChamadoDb({
+      chamadoId: id,
+      autorId: autorIdNum,
+      mensagem: mensagemLimpa
+    });
+
+    res.status(201).json(interacao);
+  } catch (err) {
+    traduzirErroBanco(err, next);
   }
 }
